@@ -1,38 +1,55 @@
 #!python
 
-import random
+# Work in progress
 
-def readopcodes(filename):
-  with open(filename, 'r') as file:
-    opcodes = []
-    unclean = file.readline().split(sep=",")
-    for digit in unclean:
-      opcodes.append(int(digit))
-    return opcodes
+with open('input_3_test.txt', 'r') as file:
+  instructions = []
+  grid = print_grid(grid_maker(300, 300))
+  for index, line in enumerate(file):
+    instructions.append(line.split(sep=","))
+  grid_start = [0, 0]
+  grid_wire_one = [[0,0]]
+  grid_wire_two = [[0,0]]
+  for index, instruction in enumerate(instructions[0]):
+    prev_x = grid_wire_one[index][0]
+    prev_y = grid_wire_one[index][1]
 
+    if instruction[0] == 'L':
+      # Left, means X-
+      grid_wire_one.append([prev_x - int(instruction[1:]), prev_y])
+    if instruction[0] == 'R':
+      # Right, means X+
+      grid_wire_one.append([prev_x + int(instruction[1:]), prev_y])
+    if instruction[0] == 'D':
+      # Down, means Y-
+      grid_wire_one.append([prev_x, prev_y - int(instruction[1:])])
+    if instruction[0] == 'U':
+      # Up, means Y+
+      grid_wire_one.append([prev_x, prev_y + int(instruction[1:])])
 
-opcodes = readopcodes('input_2.txt')
-noun = 0
-verb = 0
-while opcodes[0] != 19690720:
-  opcodes = readopcodes('input_2.txt')
-  noun = random.randint(0,99)
-  verb = random.randint(0,99)
+  for index, instruction in enumerate(instructions[1]):
+    prev_x = grid_wire_two[index][0]
+    prev_y = grid_wire_two[index][1]
 
-  opcodes[1] = noun
-  opcodes[2] = verb
+    if instruction[0] == 'L':
+      # Left, means X-
+      grid_wire_two.append([prev_x - int(instruction[1:]), prev_y])
+    if instruction[0] == 'R':
+      # Right, means X+
+      grid_wire_two.append([prev_x + int(instruction[1:]), prev_y])
+    if instruction[0] == 'D':
+      # Down, means Y-
+      grid_wire_two.append([prev_x, prev_y - int(instruction[1:])])
+    if instruction[0] == 'U':
+      # Up, means Y+
+      grid_wire_two.append([prev_x, prev_y + int(instruction[1:])])
 
-  for code in range(0, len(opcodes), 4):
-    new_codes = opcodes[code:code+4]
-    if new_codes[0] == 1:
-      value = opcodes[new_codes[1]] + opcodes[new_codes[2]]
-    if new_codes[0] == 2:
-      value = opcodes[new_codes[1]] * opcodes[new_codes[2]]
-    opcodes[new_codes[3]] = value
-    new_codes = opcodes[code:code+4]
-    if new_codes[0] == 99 or new_codes[3] == 99:
-      break
-  
-
-print("Noun: " + str(noun))
-print("Verb: " + str(verb))
+  grids = grid_wire_one + grid_wire_two
+  crosses = list(set(tuple(x) for x in grids))
+  distances = []
+  for crossing in crosses:
+    if crossing == (0, 0):
+      continue
+    manhattan = abs(0 - crossing[0]) + abs(0 - crossing[1])
+    distances.append(manhattan)
+  distances.sort()
